@@ -21,13 +21,19 @@ public class Password {
         salt = new byte[16];
         random.nextBytes(salt);
 
-        KeySpec spec = new PBEKeySpec(this.password, salt, 65536, 128);
-        try {
-            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-            hash = factory.generateSecret(spec).getEncoded();
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            e.printStackTrace();
-        }
+        generateHash();
+    }
+
+
+
+    public Password(String password, String salt) {
+        this.password = password.toCharArray();
+        this.salt = Base64.getDecoder().decode(salt);
+        generateHash();
+    }
+
+    public boolean checkHash(String hashAsBase64) {
+        return getHash().equals(hashAsBase64);
     }
 
     public String getHash() {
@@ -36,6 +42,16 @@ public class Password {
 
     public String getSalt() {
         return Base64.getEncoder().encodeToString(salt);
+    }
+
+    private void generateHash() {
+        KeySpec spec = new PBEKeySpec(this.password, salt, 65536, 128);
+        try {
+            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+            hash = factory.generateSecret(spec).getEncoded();
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            e.printStackTrace();
+        }
     }
 
 

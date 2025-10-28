@@ -1,5 +1,6 @@
 package keydust.gui;
 
+import keydust.db.SqliteDB;
 import keydust.gui.core.PasswordManagerGUI;
 
 import javax.swing.*;
@@ -14,8 +15,15 @@ public class Passwordgui extends PasswordManagerGUI {
     private JTable table;
     private JScrollPane sp;
 
-    public Passwordgui() {
-        super("Password",new Dimension(800,400), JFrame.EXIT_ON_CLOSE);
+    String password;
+    SqliteDB sqlite;
+
+    public Passwordgui(String password, SqliteDB sqlite) {
+        super("Passwords",new Dimension(800,400), JFrame.EXIT_ON_CLOSE);
+
+        this.password = password;
+        this.sqlite = sqlite;
+
         createTable();
         initPanel();
     }
@@ -41,7 +49,7 @@ public class Passwordgui extends PasswordManagerGUI {
     private void createAddPasswordButton() {
         btnAddPassword = new JButton("Add Password");
         btnAddPassword.addActionListener(e -> {
-            AddPasswordGUI password = new AddPasswordGUI();
+            AddPasswordGUI password = new AddPasswordGUI(this.password, this.sqlite);
             password.setVisible(true);
         });
     }

@@ -1,9 +1,12 @@
 package keydust.gui;
 
+import keydust.contollers.AddPwdController;
+import keydust.db.SqliteDB;
 import keydust.gui.core.PasswordManagerGUI;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.SQLException;
 
 public class AddPasswordGUI extends PasswordManagerGUI {
 
@@ -12,8 +15,14 @@ public class AddPasswordGUI extends PasswordManagerGUI {
     private JPasswordField pwd;
     private JButton save;
 
-    public AddPasswordGUI() {
+    String password;
+    SqliteDB sqlite;
+
+    public AddPasswordGUI(String password, SqliteDB sqlite) {
         super("Add Password", new Dimension(300,200), JFrame.DISPOSE_ON_CLOSE);
+
+        this.password = password;
+        this.sqlite = sqlite;
 
 
     }
@@ -41,5 +50,18 @@ public class AddPasswordGUI extends PasswordManagerGUI {
         txtUsername = new JTextField();
         pwd = new JPasswordField();
         save = new JButton("Add Password");
+        save.addActionListener(e -> {
+            AddPwdController controller = new AddPwdController(this.password, this.sqlite);
+
+            String description = txtDesription.getText();
+            String username = txtUsername.getText();
+            String password = pwd.getText();
+
+            try {
+                controller.savePassword(description, username, password);
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, "Could, not add credential: " + e.toString(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
     }
 }

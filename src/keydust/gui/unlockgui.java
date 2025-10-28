@@ -1,9 +1,12 @@
 package keydust.gui;
 
+import keydust.contollers.OpenDBController;
 import keydust.gui.core.PasswordManagerGUI;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.sql.SQLException;
 
 public class unlockgui extends PasswordManagerGUI {
 
@@ -12,6 +15,8 @@ public class unlockgui extends PasswordManagerGUI {
     private JButton btnNew;
     private JLabel lblPwd;
     private JPasswordField pwd;
+
+    private String path;
 
     public unlockgui() {
         super("Password Manager", new Dimension(400,200));
@@ -27,7 +32,7 @@ public class unlockgui extends PasswordManagerGUI {
 
     private void initPanel() {
         panel.setLayout(new GridBagLayout());
-        
+
         placeElement(lblPwd, 1, 0, 2, null);
         placeElement(pwd, 1,1,2, null);
         placeElement(btnOpenDB, 1,2,2, new Insets(10,0,0,0));
@@ -58,14 +63,34 @@ public class unlockgui extends PasswordManagerGUI {
     private void createConfirmButton() {
         btnConfirm = new JButton("Open");
         btnConfirm.addActionListener(e -> {
-            Passwordgui passwords = new Passwordgui();
-            passwords.setVisible(true);
-            dispose();
+            OpenDBController controller = new OpenDBController(path);
+
+            String password = pwd.getText();
+            System.out.println("Password in GUI: " + password);
+            try {
+                if (controller.checkPassword(password)) {
+                    Passwordgui passwords = new Passwordgui(password, controller.getSqlite());
+                    passwords.setVisible(true);
+                    dispose();
+                }
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
         });
     }
 
     private void createOpenDBButton() {
         btnOpenDB = new JButton("Select Database");
+        btnOpenDB.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser();
+
+            chooser.setCurrentDirectory(new File("."));
+
+            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                path = chooser.getSelectedFile().getAbsolutePath();
+                System.out.println(path);
+            }
+        });
     }
 
     private void placeElement(JComponent component, int gridx, int gridy, int gridwidth, Insets insets) {
