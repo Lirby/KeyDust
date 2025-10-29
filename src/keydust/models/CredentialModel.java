@@ -3,9 +3,8 @@ package keydust.models;
 import keydust.db.SqliteDB;
 import org.jasypt.util.text.StrongTextEncryptor;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
 
 public class CredentialModel extends Model {
     public CredentialModel(SqliteDB sqlite) {
@@ -44,5 +43,35 @@ public class CredentialModel extends Model {
         st.setString(3, encryptedPassword);
 
         st.executeUpdate();
+    }
+
+    public ArrayList<String[]> loadCredentials(String encryptionPassword) throws SQLException {
+        String sql = "SELECT * FROM credential";
+
+        Connection connection = sqlite.getConnection();
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+
+        StrongTextEncryptor textEncryptor = new StrongTextEncryptor();
+        textEncryptor.setPassword(encryptionPassword);
+
+        ArrayList<String[]> credentials = new ArrayList<>();
+        while(rs.next()) {
+            String encryptedDescription= rs.getString("description");
+            String encryptedUsername = rs.getString("username");
+            String encryptedPassword = rs.getString("password");
+
+            String description = textEncryptor.decrypt(encryptedDescription);
+            String username = textEncryptor.decrypt(encryptedUsername);
+            String password = textEncryptor.decrypt(encryptedPassword);
+
+            String[] row = {
+                    description,
+                    username,
+                    password
+            };
+            credentials.add(row);
+        }
+        return credentials;
     }
 }

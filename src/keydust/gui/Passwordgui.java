@@ -1,10 +1,12 @@
 package keydust.gui;
 
+import keydust.contollers.ShowPwdController;
 import keydust.db.SqliteDB;
 import keydust.gui.core.PasswordManagerGUI;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.SQLException;
 
 public class Passwordgui extends PasswordManagerGUI {
 
@@ -23,6 +25,13 @@ public class Passwordgui extends PasswordManagerGUI {
 
         this.password = password;
         this.sqlite = sqlite;
+
+        ShowPwdController controller = new ShowPwdController(password, sqlite);
+        try {
+            data = controller.loadPasswords();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         createTable();
         initPanel();
