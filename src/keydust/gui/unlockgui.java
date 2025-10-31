@@ -19,7 +19,7 @@ public class unlockgui extends PasswordManagerGUI {
     private String path;
 
     public unlockgui() {
-        super("KeyDust: v0.1.0 Snapshot", new Dimension(400,200));
+        super("KeyDust: v0.1.1 Snapshot", new Dimension(400,200));
     }
 
     @Override

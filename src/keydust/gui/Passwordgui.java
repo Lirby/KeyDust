@@ -56,11 +56,23 @@ public class Passwordgui extends PasswordManagerGUI {
     }
 
     private void createAddPasswordButton() {
-        btnAddPassword = new JButton("Add Password");
+        btnAddPassword = new JButton("Add a new Password");
         btnAddPassword.addActionListener(e -> {
-            AddPasswordGUI password = new AddPasswordGUI(this.password, this.sqlite);
-            password.setVisible(true);
+            AddPasswordGUI addPasswordWindow = new AddPasswordGUI(this.password, this.sqlite, this);
+            addPasswordWindow.setVisible(true);
         });
+    }
+
+    public void refreshTable() {
+        ShowPwdController controller = new ShowPwdController(password, sqlite);
+        try {
+            data = controller.loadPasswords();
+            table.setModel(new javax.swing.table.DefaultTableModel(data, columnNames));
+            table.revalidate();
+            table.repaint();
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Could not reload password:" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
 
