@@ -2,7 +2,6 @@ package keydust.models;
 
 import keydust.db.SqliteDB;
 import org.jasypt.util.text.StrongTextEncryptor;
-
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -25,7 +24,7 @@ public class CredentialModel extends Model {
     public void saveCredential(String encryptionPassword, String description, String username, String password) throws SQLException {
         String sql =
                 "INSERT INTO credential " +
-                "(description, username, password)" +
+                        "(description, username, password)" +
                         "VALUES (?, ?, ?)";
 
         Connection connection = sqlite.getConnection();
@@ -57,6 +56,7 @@ public class CredentialModel extends Model {
 
         ArrayList<String[]> credentials = new ArrayList<>();
         while(rs.next()) {
+            String id = String.valueOf(rs.getInt("id"));
             String encryptedDescription= rs.getString("description");
             String encryptedUsername = rs.getString("username");
             String encryptedPassword = rs.getString("password");
@@ -66,6 +66,7 @@ public class CredentialModel extends Model {
             String password = textEncryptor.decrypt(encryptedPassword);
 
             String[] row = {
+                    id,
                     description,
                     username,
                     password
@@ -73,5 +74,26 @@ public class CredentialModel extends Model {
             credentials.add(row);
         }
         return credentials;
+    }
+
+    public void updateCredential(String encryptionPassword, int id, String description, String username, String password) throws SQLException {
+        String sql = "UPDATE credential SET description = ?, username = ?, password = ? WHERE id = ?";
+
+        Connection connection = sqlite.getConnection();
+        PreparedStatement st = connection.prepareStatement(sql);
+
+        StrongTextEncryptor textEncryptor = new StrongTextEncryptor();
+        textEncryptor.setPassword(encryptionPassword);
+
+        String encryptedDescription = textEncryptor.encrypt(description);
+        String encryptedUsername = textEncryptor.encrypt(username);
+        String encryptedPassword = textEncryptor.encrypt(password);
+
+        st.setString(1, encryptedDescription);
+        st.setString(2, encryptedUsername);
+        st.setString(3, encryptedPassword);
+        st.setInt(4, id);
+
+        st.executeUpdate();
     }
 }
